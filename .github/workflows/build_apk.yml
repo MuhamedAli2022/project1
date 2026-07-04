@@ -35,29 +35,32 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Recreate Android Project Files
+      - name: Force Hard Update pubspec.yaml Text
         run: |
+          # تعديل مباشر لنص الملف لحل مشكلة glass نهائياً قبل تشغيل أي أمر فلاتر
+          sed -i 's/glass: ^0.2.1/glass: ^2.0.0+2/g' pubspec.yaml
+          sed -i "s/glass: '^0.2.1'/glass: '^2.0.0+2'/g" pubspec.yaml
+
+      - name: Recreate Android Project Files (No Pub)
+        run: |
+          # توليد ملفات الأندرويد مع منع فلاتر من فحص المكتبات مؤقتاً ليتخطى الأخطاء
           rm -rf android
-          flutter create . --platforms=android
+          flutter create . --platforms=android --no-pub
 
       - name: Auto Upgrade All Dependencies
         run: |
-          # التحديث الذكي والآمن لكل المكتبات التالفة والقديمة دفعة واحدة
+          # تحديث باقي المكتبات مثل font_awesome_flutter التالفة تلقائياً
           flutter pub upgrade --major-versions
 
       - name: Auto Fix Copilot Code Errors
         run: |
-          # إصلاح مسميات الأيقونات الخاطئة التي كتبها كوبايلوت
+          # تصحيح أخطاء الأكواد ومسميات الأيقونات وحركات الأنميشن
           find . -name "*.dart" -exec sed -i 's/Icons.virus_lock/Icons.security/g' {} +
           find . -name "*.dart" -exec sed -i 's/Icons.medicine/Icons.medical_services/g' {} +
-          
-          # إصلاح مسميات حركات الأنميشن غير المتوافقة
           find . -name "*.dart" -exec sed -i 's/\.slideUp(/.slide(/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideInRight(/.slide(/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideUp()/.slide()/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideInRight()/.slide()/g' {} +
-          
-          # إزالة السطر المسبب للمشكلة في الـ BoxDecoration
           find . -name "animated_widgets.dart" -exec sed -i '/backdropFilter:/d' {} +
 
       - name: Install dependencies
