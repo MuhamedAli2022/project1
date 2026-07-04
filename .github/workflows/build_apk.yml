@@ -35,39 +35,36 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Force Fix Dependencies Versions
-        run: |
-          # استبدال المكتبات القديمة بأحدث إصدارات متوافقة لحل مشاكل الأكواد تلقائياً
-          sed -i 's/glass: ^0.2.1/glass: ^2.0.0+2/g' pubspec.yaml
-          sed -i "s/glass: '^0.2.1'/glass: '^2.0.0+2'/g" pubspec.yaml
-          flutter pub add font_awesome_flutter:latest
-          flutter pub add flutter_animate:latest
-
       - name: Recreate Android Project Files
         run: |
           rm -rf android
           flutter create . --platforms=android
 
+      - name: Auto Upgrade All Dependencies
+        run: |
+          # التحديث الذكي والآمن لكل المكتبات التالفة والقديمة دفعة واحدة
+          flutter pub upgrade --major-versions
+
       - name: Auto Fix Copilot Code Errors
         run: |
-          # إصلاح مسميات الأيقونات الخاطئة التي اقترحها كوبايلوت داخل الملفات
+          # إصلاح مسميات الأيقونات الخاطئة التي كتبها كوبايلوت
           find . -name "*.dart" -exec sed -i 's/Icons.virus_lock/Icons.security/g' {} +
           find . -name "*.dart" -exec sed -i 's/Icons.medicine/Icons.medical_services/g' {} +
           
-          # إصلاح أخطاء حركات الأنميشن غير الموجودة وتحويلها لحركات قياسية
+          # إصلاح مسميات حركات الأنميشن غير المتوافقة
           find . -name "*.dart" -exec sed -i 's/\.slideUp(/.slide(/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideInRight(/.slide(/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideUp()/.slide()/g' {} +
           find . -name "*.dart" -exec sed -i 's/\.slideInRight()/.slide()/g' {} +
           
-          # إزالة السطر التالف الخاص بالـ backdropFilter من الويدجت المشبوه
+          # إزالة السطر المسبب للمشكلة في الـ BoxDecoration
           find . -name "animated_widgets.dart" -exec sed -i '/backdropFilter:/d' {} +
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --debug --no-pub
+        run: flutter build apk --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
