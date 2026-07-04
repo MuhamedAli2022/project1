@@ -14,8 +14,18 @@ jobs:
       - name: Unzip Project File
         run: |
           sudo apt-get install unzip
-          unzip poultrypro_egypt.zip -d ./flutter_project
-          cp -r ./flutter_project/* . || true 
+          unzip poultrypro_egypt.zip -d ./extracted_project
+          
+          # البحث عن مكان ملف pubspec.yaml ونقل محتوياته للمجلد الرئيسي
+          PUBSPEC_PATH=$(find ./extracted_project -name "pubspec.yaml" -print -quit)
+          if [ -n "$PUBSPEC_PATH" ]; then
+            PROJECT_DIR=$(dirname "$PUBSPEC_PATH")
+            cp -r "$PROJECT_DIR"/* . || true
+            echo "Project files moved successfully from $PROJECT_DIR"
+          else
+            echo "Error: pubspec.yaml not found inside the ZIP!"
+            exit 1
+          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
