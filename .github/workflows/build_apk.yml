@@ -39,16 +39,19 @@ jobs:
 
       - name: Recreate Android Project Files
         run: |
-          # مسح مجلد أندرويد القديم التالف إن وجد وإعادة توليده بشكل صحيح
+          # 1. إنشاء ملفات الأندرويد أولاً
           rm -rf android
           flutter create . --platforms=android
 
-      - name: Fix Glass Dependency
+      - name: Fix Glass Dependency & Install
         run: |
-          flutter pub add glass:'^2.0.0+2' --offline || flutter pub add glass
+          # 2. تحديث وتثبيت مكتبة glass بعد توليد الملفات لضمان عدم مسحها
+          flutter pub add glass:'^2.0.0+2'
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          # 3. تحميل باقي مكتبات المشروع بالكامل
+          flutter pub get
 
       - name: Build APK
         run: flutter build apk --debug
