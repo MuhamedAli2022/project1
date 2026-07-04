@@ -20,9 +20,7 @@ jobs:
           if [ -n "$PUBSPEC_PATH" ]; then
             PROJECT_DIR=$(dirname "$PUBSPEC_PATH")
             cp -r "$PROJECT_DIR"/* . || true
-            echo "Project files moved successfully from $PROJECT_DIR"
           else
-            echo "Error: pubspec.yaml not found inside the ZIP!"
             exit 1
           fi
 
@@ -37,22 +35,39 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Force Update Glass Version in pubspec
+      - name: Force Fix Dependencies Versions
         run: |
-          # استبدال رقم إصدار glass القديم بالإصدار الجديد المتوافق داخل الملف مباشرة
+          # استبدال المكتبات القديمة بأحدث إصدارات متوافقة لحل مشاكل الأكواد تلقائياً
           sed -i 's/glass: ^0.2.1/glass: ^2.0.0+2/g' pubspec.yaml
           sed -i "s/glass: '^0.2.1'/glass: '^2.0.0+2'/g" pubspec.yaml
+          flutter pub add font_awesome_flutter:latest
+          flutter pub add flutter_animate:latest
 
       - name: Recreate Android Project Files
         run: |
           rm -rf android
           flutter create . --platforms=android
 
+      - name: Auto Fix Copilot Code Errors
+        run: |
+          # إصلاح مسميات الأيقونات الخاطئة التي اقترحها كوبايلوت داخل الملفات
+          find . -name "*.dart" -exec sed -i 's/Icons.virus_lock/Icons.security/g' {} +
+          find . -name "*.dart" -exec sed -i 's/Icons.medicine/Icons.medical_services/g' {} +
+          
+          # إصلاح أخطاء حركات الأنميشن غير الموجودة وتحويلها لحركات قياسية
+          find . -name "*.dart" -exec sed -i 's/\.slideUp(/.slide(/g' {} +
+          find . -name "*.dart" -exec sed -i 's/\.slideInRight(/.slide(/g' {} +
+          find . -name "*.dart" -exec sed -i 's/\.slideUp()/.slide()/g' {} +
+          find . -name "*.dart" -exec sed -i 's/\.slideInRight()/.slide()/g' {} +
+          
+          # إزالة السطر التالف الخاص بالـ backdropFilter من الويدجت المشبوه
+          find . -name "animated_widgets.dart" -exec sed -i '/backdropFilter:/d' {} +
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --no-pub
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
