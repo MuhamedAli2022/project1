@@ -16,7 +16,6 @@ jobs:
           sudo apt-get install unzip
           unzip poultrypro_egypt.zip -d ./extracted_project
           
-          # البحث عن مكان ملف pubspec.yaml ونقل محتوياته للمجلد الرئيسي
           PUBSPEC_PATH=$(find ./extracted_project -name "pubspec.yaml" -print -quit)
           if [ -n "$PUBSPEC_PATH" ]; then
             PROJECT_DIR=$(dirname "$PUBSPEC_PATH")
@@ -37,6 +36,11 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Fix Glass Dependency
+        run: |
+          # تحديث مكتبة glass تلقائياً لحل مشكلة التوافق
+          flutter pub add glass:'^2.0.0+2' --offline || flutter pub add glass
 
       - name: Install dependencies
         run: flutter pub get
