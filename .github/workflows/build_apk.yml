@@ -37,21 +37,19 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Force Update Glass Version in pubspec
+        run: |
+          # استبدال رقم إصدار glass القديم بالإصدار الجديد المتوافق داخل الملف مباشرة
+          sed -i 's/glass: ^0.2.1/glass: ^2.0.0+2/g' pubspec.yaml
+          sed -i "s/glass: '^0.2.1'/glass: '^2.0.0+2'/g" pubspec.yaml
+
       - name: Recreate Android Project Files
         run: |
-          # 1. إنشاء ملفات الأندرويد أولاً
           rm -rf android
           flutter create . --platforms=android
 
-      - name: Fix Glass Dependency & Install
-        run: |
-          # 2. تحديث وتثبيت مكتبة glass بعد توليد الملفات لضمان عدم مسحها
-          flutter pub add glass:'^2.0.0+2'
-
       - name: Install dependencies
-        run: |
-          # 3. تحميل باقي مكتبات المشروع بالكامل
-          flutter pub get
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --debug
