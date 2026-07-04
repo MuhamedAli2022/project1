@@ -37,9 +37,14 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Recreate Android Project Files
+        run: |
+          # مسح مجلد أندرويد القديم التالف إن وجد وإعادة توليده بشكل صحيح
+          rm -rf android
+          flutter create . --platforms=android
+
       - name: Fix Glass Dependency
         run: |
-          # تحديث مكتبة glass تلقائياً لحل مشكلة التوافق
           flutter pub add glass:'^2.0.0+2' --offline || flutter pub add glass
 
       - name: Install dependencies
